@@ -288,9 +288,32 @@ void cbm_minhash_to_hex(const cbm_minhash_t *fp, char *buf, int bufsize) {
         }
         return;
     }
-    int pos = 0;
+    size_t pos = 0;
     for (int i = 0; i < CBM_MINHASH_K; i++) {
-        pos += snprintf(buf + pos, (size_t)(bufsize - pos), "%08x", fp->values[i]);
+        size_t remaining = (size_t)bufsize - pos;
+        int written = snprintf(buf + pos, remaining, "%08x", fp->values[i]);
+        if (written < 0) {
+            /* Encoding error: terminate and stop. */
+            if (pos < (size_t)bufsize) {
+                buf[pos] = '\0';
+            }
+            break;
+        }
+        if ((size_t)written >= remaining) {
+            /* Truncation: ensure NUL-termination and stop. */
+            if (bufsize > 0) {
+                buf[bufsize - 1] = '\0';
+            }
+            break;
+        }
+        pos += (size_t)written;
+    }
+    if (bufsize > 0) {
+        if (pos >= (size_t)bufsize) {
+            buf[bufsize - 1] = '\0';
+        } else {
+            buf[pos] = '\0';
+        }
     }
 }
 
