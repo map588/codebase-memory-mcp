@@ -92,7 +92,9 @@ static void lex_string_literal(const char *input, int len, int *pos, char quote,
     int start = *pos;
     char buf[CBM_SZ_4K];
     int blen = 0;
+    const int max_blen = CBM_SZ_4K - 1;
     while (*pos < len && input[*pos] != quote) {
+        if (blen >= max_blen) { (*pos)++; continue; }
         if (input[*pos] == '\\' && *pos + SKIP_ONE < len) {
             (*pos)++;
             switch (input[*pos]) {
