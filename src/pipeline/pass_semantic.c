@@ -321,6 +321,10 @@ static void resolve_decorator(cbm_pipeline_ctx_t *ctx, const cbm_gbuf_node_t *no
         char props[CBM_SZ_256];
         snprintf(props, sizeof(props), "{\"decorator\":\"%s\"}", decorator);
         cbm_gbuf_insert_edge(ctx->gbuf, node->id, dec->id, "DECORATES", props);
+        /* Ensure a CALLS edge exists so decorator appears in reference queries.
+         * Use "{}" to avoid clobbering richer metadata from pass_calls
+         * (dedup skips replacement when new props are "{}"). */
+        cbm_gbuf_insert_edge(ctx->gbuf, node->id, dec->id, "CALLS", "{}");
         (*count)++;
     }
 }
